@@ -4,7 +4,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var blogRouter = require('./routes/posts');
+var pingRouter = require('./routes/ping');
 
 var app = express();
 
@@ -15,6 +16,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/posts', blogRouter);
+app.use('/api/ping', pingRouter);
+
+app.use((err, req, res, next) => {
+    res.status(err.status || 500).send(err.message || 'API route not found: Internal server error.')
+})
 
 module.exports = app;
