@@ -68,12 +68,9 @@ describe('GET api/posts', () => {
                           `All posts' tags include query.params.tags`,
                         pass: true
                     }
-
                 }
             })
             expect(response.body).toIncludeTags(['tech', 'politics']);          
         })
     })
-
-    //TEST CASE: GET POSTS
 })
