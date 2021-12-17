@@ -22,7 +22,7 @@ describe('GET api/ping', () => {
 
 describe('GET api/posts', () => {
     //TEST CASE: GET PING
-    it('GET /api/posts/:tag --> returns array of posts that match the tag', () => {
+    it('GET /api/posts/:tag --> returns array of posts that match a single tag', () => {
         return request(app)
         .get('/api/posts/tech')
         .expect('Content-Type', /json/)
@@ -39,6 +39,39 @@ describe('GET api/posts', () => {
                     })
                 ])
             )
+        })
+    })
+ 
+    //it accepts more than 1 tag... 
+    it('GET /api/posts/:tag --> returns array of posts that match multiple tags', () => {
+        return request(app)
+        .get('/api/posts/tech,politics')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then((response)=> {
+            expect.extend({
+                toIncludeTags(posts, paramTags){
+                    for (let i=0; i< posts.length; i++){
+                        let post = posts[i]
+                        let sum = 0
+                        paramTags.forEach((pTag) => {sum += post.tags.indexOf(pTag)})
+                        if ( sum <= (-1 * paramTags.length)){
+                            return {
+                                message: () =>
+                                  `Not all posts' tags include query.params.tags`,
+                                pass: false
+                              }  
+                        }
+                    }
+                    return {
+                        message: () =>
+                          `All posts' tags include query.params.tags`,
+                        pass: true
+                    }
+
+                }
+            })
+            expect(response.body).toIncludeTags(['tech', 'politics']);          
         })
     })
 
