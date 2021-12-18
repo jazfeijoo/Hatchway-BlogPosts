@@ -19,6 +19,7 @@ router.get('/:tags/:sortBy?/:direction?', async (req, res, next) => {
     const sortBy = req.params.sortBy
     const dirSort = req.params.direction 
     let final = []
+    let map = {}
 
     if(sortBy && !sortTypes.includes(sortBy)){
       res.status(400).json({"error": "sortBy parameter is invalid"})
@@ -30,12 +31,17 @@ router.get('/:tags/:sortBy?/:direction?', async (req, res, next) => {
 
     for (let i=0;i<tagsArr.length; i++){
       let currTag = tagsArr[i]
-      final = final.concat( await axios
+      await axios
         .get(blog_url, { params : { tag: currTag }})
-        .then((res) => {return res.data.posts})
-      )
-    } 
-
+        .then((res) => {
+          res.data.posts.forEach((post)=> {
+            if (!map[post.id]){
+              map[post.id] = 1
+              final.push(post)
+            }
+          })
+        })
+    }
     if (sortBy){
       final.sort((a,b) => {
         if (dirSort === dirTypes[1]){
@@ -44,7 +50,6 @@ router.get('/:tags/:sortBy?/:direction?', async (req, res, next) => {
         return a[sortBy] - b[sortBy]
       })
     }
- //   console.log('FINAL SORTED', final)
     res.status(200).json(final)
   } catch (err){
       res.send(err)
