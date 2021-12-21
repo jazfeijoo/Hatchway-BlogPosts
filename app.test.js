@@ -73,4 +73,47 @@ describe('GET api/posts', () => {
             expect(response.body).toIncludeTags(['tech', 'politics']);          
         })
     })
+
+    it('GET /api/posts/:tag/:sortBy? --> returns array of posts that are sorted by the approved types (id, likes, popularity,)', () => {
+        return request(app)
+        .get('/api/posts/tech/likes/desc')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then((response)=> {
+            expect.extend({
+                tobeSorted(posts, sortBy, orderBy){
+                    for (let i=0; i< posts.length; i++){
+                        let currPost = posts[i]
+                        let nextPost = posts[i+1]
+                        if (nextPost){
+                            //if there is a next, check order...
+                            if(orderBy === 'desc'){
+                                if(currPost[sortBy] < nextPost[sortBy]){
+                                    return {
+                                        message: () =>
+                                          `Posts are not sorted by descending order`,
+                                        pass: false
+                                      } 
+                                }
+                            } else {
+                                if(currPost[sortBy] > nextPost[sortBy]){
+                                    return {
+                                        message: () =>
+                                          `Posts are not sorted by ascending order`,
+                                        pass: false
+                                      } 
+                                }
+                            }
+                        }
+                    }
+                    return {
+                        message: () =>
+                          `All posts are correctly sorted`,
+                        pass: true
+                    }
+                } 
+            })
+            expect(response.body).tobeSorted('likes', 'desc');          
+        })
+    })
 })
